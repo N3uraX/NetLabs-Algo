@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "cybersec-database": {
+      "command": "python",
+      "args": ["server.py"],
+      "cwd": "./mcp-database",
+      "env": {
+        "DATABASE_URL": "postgresql://username:password@localhost:5432/cybersec_db",
+        "JWT_SECRET": "your-super-secret-jwt-key"
+      }
+    }
+  }
+} 

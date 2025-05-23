@@ -1,0 +1,33 @@
+# MCP Database Server Integration Rules
+
+This project uses an MCP (Model Context Protocol) Database Server for automated database management.
+
+## Available MCP Tools:
+- `connect_database` - Connect to PostgreSQL database
+- `create_tables` - Create cybersecurity platform tables  
+- `create_user` - Create new user with hashed password
+- `authenticate_user` - Login and generate JWT token
+- `verify_token` - Validate JWT tokens
+- `execute_query` - Execute raw SQL queries
+- `get_table_info` - Get database schema information
+- `seed_sample_data` - Insert sample data for testing
+
+## Database Schema (Cybersecurity Focus):
+- users (authentication, roles)
+- organizations (client companies)
+- assets (IT infrastructure)
+- threats (security incidents)
+- vulnerabilities (security weaknesses)
+- security_events (audit logs)
+- network_monitoring (device status)
+
+## Integration Approach:
+1. MCP server replaces direct SQLAlchemy/Alembic usage
+2. Backend communicates with MCP server via tools
+3. Frontend remains unchanged (uses FastAPI endpoints)
+4. All database operations go through MCP tools
+
+## When making database changes:
+- Use MCP tools instead of direct SQL
+- Call appropriate tools for CRUD operations
+- Leverage built-in authentication and security features 
