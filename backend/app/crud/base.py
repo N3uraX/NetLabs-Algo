@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import update as sqlalchemy_update, delete as sqlalchemy_delete
 
-from app.db.base_class import Base # Assuming your SQLAlchemy models inherit from Base in app.db.base_class
+from app.core.database import Base # Corrected path to Base
 
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
