@@ -5,4 +5,5 @@ pydantic-settings
 python-jose[cryptography]
 passlib[bcrypt]
 redis
-routeros-api 
+routeros-api
+asyncpg 
