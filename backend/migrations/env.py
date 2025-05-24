@@ -4,8 +4,10 @@ print("--- EXECUTING migrations/env.py ---")
 
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
+# from sqlalchemy import engine_from_config # No longer needed
 from sqlalchemy import pool
+import asyncio # <--- Import asyncio
+from sqlalchemy.ext.asyncio import create_async_engine # <--- Import create_async_engine
 
 from alembic import context
 
@@ -49,42 +51,34 @@ else:
     print("- No metadata tables found.")
 print("--- END DIAGNOSTIC PRINT ---")
 
-# Function to run migrations in 'online' mode.
-# In this scenario we need to create an Engine
-# and associate a connection with the context.
-def run_migrations_online() -> None:
+# Helper synchronous function for Alembic operations
+def do_run_migrations(connection):
+    context.configure(connection=connection, target_metadata=target_metadata)
+    with context.begin_transaction():
+        context.run_migrations()
+
+# Function to run migrations in 'online' mode (async version)
+async def run_migrations_online_async() -> None:
     """Run migrations in 'online' mode.
 
     In this scenario we need to create an Engine
     and associate a connection with the context.
 
     """
-    # Get the database URL from your application settings
     db_url = app_settings.DATABASE_URL
     if not db_url:
         raise ValueError("DATABASE_URL is not set in the application settings (.env file).")
 
-    connectable_config = config.get_section(config.config_ini_section)
-    if connectable_config is not None:
-        connectable_config["sqlalchemy.url"] = str(db_url) # Ensure it's a string
-    else:
-        # This should ideally not happen if alembic.ini is well-formed
-        config.set_main_option("sqlalchemy.url", str(db_url))
-        connectable_config = {"sqlalchemy.url": str(db_url)}
-        
-    connectable = engine_from_config(
-        connectable_config,
-        prefix="sqlalchemy.",
+    # Create an async engine
+    connectable = create_async_engine(
+        str(db_url),
         poolclass=pool.NullPool,
     )
 
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+    async with connectable.connect() as connection:
+        await connection.run_sync(do_run_migrations)
 
-        with context.begin_transaction():
-            context.run_migrations()
+    await connectable.dispose()
 
 
 if context.is_offline_mode():
@@ -92,4 +86,4 @@ if context.is_offline_mode():
     # context.run_migrations_offline()
     print("Offline mode is not configured. Please run with a database connection.")
 else:
-    run_migrations_online() 
+    asyncio.run(run_migrations_online_async()) 

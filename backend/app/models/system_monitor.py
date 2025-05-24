@@ -1,10 +1,12 @@
 import uuid
+import enum  # <--- ADDED IMPORT
 from sqlalchemy import Column, String, DateTime, Float, JSON, Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID
 from app.core.database import Base
 from datetime import datetime
 
-class SystemStatus(str, SAEnum):
+# CORRECTED ENUM DEFINITION
+class SystemStatus(str, enum.Enum):  # Inherits from enum.Enum
     ONLINE = "online"
     OFFLINE = "offline"
     DEGRADED = "degraded"
@@ -16,7 +18,8 @@ class SystemMonitor(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     system_id = Column(String, nullable=False, index=True) # ID of the monitored system/asset
     system_name = Column(String, nullable=False, index=True)
-    status = Column(SAEnum(SystemStatus, name="system_status_enum", create_type=False), default=SystemStatus.UNKNOWN, nullable=False, index=True)
+    # This SAEnum call should now work correctly with values_callable
+    status = Column(SAEnum(SystemStatus, name="system_status_enum", create_type=False, values_callable=lambda obj: [e.value for e in obj]), default=SystemStatus.UNKNOWN, nullable=False, index=True)
     cpu_usage = Column(Float, nullable=True) # Percentage
     memory_usage = Column(Float, nullable=True) # Percentage
     disk_usage = Column(Float, nullable=True) # Percentage
@@ -26,4 +29,4 @@ class SystemMonitor(Base):
     additional_metrics = Column(JSON, nullable=True) # For any other specific metrics
 
     # This model is likely to be stored in TimescaleDB for performance with time-series data.
-    # Ensure your TimescaleDB setup and Alembic migrations handle this appropriately. 
+    # Ensure your TimescaleDB setup and Alembic migrations handle this appropriately.
